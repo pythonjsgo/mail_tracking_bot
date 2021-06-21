@@ -1,10 +1,11 @@
 import logging
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
 import config
 from db_manager import DB_manager
-from handlers import StartHandler, AddDeparture, MyDepartures, Other
+from handlers import StartHandler, AddDeparture, MyDepartures, Other, button
+from services.mail_traking_notifycations import short_report
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,6 +14,8 @@ logger = logging.getLogger(__name__)
 db_manager = DB_manager()
 
 def main():
+    short_report("ZF666863881HK")
+    input()
     updater = Updater(config.TOKEN, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', StartHandler))
@@ -20,6 +23,7 @@ def main():
     dispatcher.add_handler(MessageHandler(Filters.regex("Назад ◀️"), StartHandler))
     dispatcher.add_handler(MessageHandler(Filters.regex("Мои отправления ✉"), MyDepartures))
     dispatcher.add_handler(MessageHandler(Filters.text, Other))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
 
     updater.start_polling()
 
